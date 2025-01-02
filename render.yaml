@@ -1,74 +1,19 @@
 services:
   - type: web
     name: crypto-analysis
-<<<<<<< HEAD
-    env: docker
-    region: frankfurt
-    plan: free
-    dockerfilePath: ./Dockerfile
-    dockerContext: .
-    envVars:
-      - key: PYTHONPATH
-        value: /app
-      - key: LD_LIBRARY_PATH
-        value: /usr/lib
-=======
     env: python
-    region: frankfurt
-    plan: free
     buildCommand: |
       # تثبيت المتطلبات الأساسية
-      apt-get update
-      apt-get install -y python3-dev build-essential wget
-
-      # إنشاء وتفعيل virtualenv
-      python -m venv .venv
-      . .venv/bin/activate
+      sudo apt-get update
+      sudo apt-get install -y python3-dev
       
-      # تحميل وتثبيت TA-Lib
-      cd /tmp
-      wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz
-      tar -xvf ta-lib-0.4.0-src.tar.gz
-      cd ta-lib/
-      ./configure --prefix=/usr
-      make
-      make install
-      cd ..
-      rm -rf ta-lib-0.4.0-src.tar.gz ta-lib/
-      
-      # تثبيت المتطلبات Python
-      pip install --upgrade pip wheel setuptools
-      pip install numpy==1.26.2
-      
-      # تثبيت TA-Lib Python
-      pip install TA-Lib==0.4.28
+      # تحميل وتثبيت الحزمة المجمعة مسبقاً لـ TA-Lib
+      wget https://files.pythonhosted.org/packages/0b/db/c85e12c91fc0f6c3e0e8f7572f089d5c6d5d93fbd6c4e22a4c6f65f69e20/TA_Lib-0.4.24-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+      pip install TA_Lib-0.4.24-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       
       # تثبيت باقي المتطلبات
       pip install -r requirements.txt
-      
-      # التحقق من التثبيت
-      echo "=== التحقق من تثبيت TA-Lib ==="
-      python -c "import talib; print('TA-Lib version:', talib.__version__)"
-      
-      # عرض المكتبات المثبتة
-      echo "=== المكتبات المثبتة ==="
-      pip list
-      
-      # عرض محتويات المجلد
-      echo "=== محتويات المجلد ==="
-      ls -la /usr/lib | grep libta
-      
-    startCommand: |
-      . .venv/bin/activate
-      export LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH
-      gunicorn "main:app.server" --timeout 180 --workers 1 --log-level debug
+    startCommand: gunicorn main:server
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
-      - key: LD_LIBRARY_PATH
-        value: /usr/lib
-      - key: PYTHONPATH
-        value: /opt/render/project/src
-      - key: VIRTUAL_ENV
-        value: /opt/render/project/src/.venv
->>>>>>> d53bcd5a1f12a9a79bdd1cfbf64c4dd68decca5e
