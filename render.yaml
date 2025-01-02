@@ -1,32 +1,13 @@
 services:
   - type: web
     name: crypto-analysis
-<<<<<<< HEAD
-    env: docker
-    region: frankfurt
-    plan: free
-    dockerfilePath: ./Dockerfile
-    dockerContext: .
-    envVars:
-      - key: PYTHONPATH
-        value: /app
-      - key: LD_LIBRARY_PATH
-        value: /usr/lib
-=======
     env: python
-    region: frankfurt
-    plan: free
     buildCommand: |
       # تثبيت المتطلبات الأساسية
       apt-get update
-      apt-get install -y python3-dev build-essential wget
+      apt-get install -y wget build-essential
 
-      # إنشاء وتفعيل virtualenv
-      python -m venv .venv
-      . .venv/bin/activate
-      
       # تحميل وتثبيت TA-Lib
-      cd /tmp
       wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz
       tar -xvf ta-lib-0.4.0-src.tar.gz
       cd ta-lib/
@@ -36,39 +17,13 @@ services:
       cd ..
       rm -rf ta-lib-0.4.0-src.tar.gz ta-lib/
       
-      # تثبيت المتطلبات Python
-      pip install --upgrade pip wheel setuptools
-      pip install numpy==1.26.2
-      
-      # تثبيت TA-Lib Python
-      pip install TA-Lib==0.4.28
-      
-      # تثبيت باقي المتطلبات
+      # تثبيت متطلبات Python
+      pip install numpy
+      pip install TA-Lib
       pip install -r requirements.txt
-      
-      # التحقق من التثبيت
-      echo "=== التحقق من تثبيت TA-Lib ==="
-      python -c "import talib; print('TA-Lib version:', talib.__version__)"
-      
-      # عرض المكتبات المثبتة
-      echo "=== المكتبات المثبتة ==="
-      pip list
-      
-      # عرض محتويات المجلد
-      echo "=== محتويات المجلد ==="
-      ls -la /usr/lib | grep libta
-      
-    startCommand: |
-      . .venv/bin/activate
-      export LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH
-      gunicorn "main:app.server" --timeout 180 --workers 1 --log-level debug
+    startCommand: gunicorn main:server
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
       - key: LD_LIBRARY_PATH
         value: /usr/lib
-      - key: PYTHONPATH
-        value: /opt/render/project/src
-      - key: VIRTUAL_ENV
-        value: /opt/render/project/src/.venv
->>>>>>> d53bcd5a1f12a9a79bdd1cfbf64c4dd68decca5e
