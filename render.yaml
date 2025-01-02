@@ -7,12 +7,19 @@ services:
     buildCommand: |
       # تثبيت المكتبات الأساسية
       apt-get update
-      apt-get install -y python3-dev build-essential wget
+      apt-get install -y python3-dev build-essential wget curl
 
-      # تحميل وتثبيت TA-Lib المجمع مسبقاً
-      wget https://files.pythonhosted.org/packages/e3/13/88f50646c3e3eff2e6fb7c0a55c3bf44e5f37eff34e1e9b29d8a62c6e6a0/TA_Lib-0.4.28-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
-      pip install TA_Lib-0.4.28-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
-
+      # تثبيت TA-Lib من مستودع Ubuntu
+      curl -L https://ubuntu.pkgs.org/20.04/ubuntu-universe-amd64/ta-lib_0.4.0-3_amd64.deb.html -o ta-lib.deb
+      dpkg -i ta-lib.deb || true
+      apt-get -f install -y
+      
+      # تثبيت numpy أولاً
+      pip install numpy==1.26.2
+      
+      # تثبيت TA-Lib Python
+      pip install TA-Lib==0.4.28
+      
       # تثبيت باقي المتطلبات
       pip install -r requirements.txt
       
@@ -28,5 +35,7 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
+      - key: LD_LIBRARY_PATH
+        value: /usr/lib
       - key: PYTHONPATH
         value: /opt/render/project/src
