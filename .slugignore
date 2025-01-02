@@ -1,0 +1,12 @@
+/venv311/
+/venv39/
+*.h5
+*.keras
+*.png
+/backup_2025_01_01/
+__pycache__/
+*.pyc
+.git/
+.env
+*.csv
+test_*
