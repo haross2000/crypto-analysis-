@@ -5,35 +5,38 @@ services:
     region: frankfurt
     plan: free
     buildCommand: |
-      # تثبيت Miniconda
-      wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-      bash miniconda.sh -b -p $HOME/miniconda
-      export PATH="$HOME/miniconda/bin:$PATH"
+      # تثبيت المتطلبات الأساسية
+      apt-get update
+      apt-get install -y python3-dev build-essential wget
+
+      # تحميل وتثبيت TA-Lib المجمع مسبقاً
+      mkdir -p /tmp/ta-lib
+      cd /tmp/ta-lib
+      wget https://downloads.sourceforge.net/project/ta-lib/ta-lib/0.4.0/ta-lib-0.4.0-src.tar.gz
+      tar -xvf ta-lib-0.4.0-src.tar.gz
+      cd ta-lib/
+      ./configure --prefix=/usr
+      make
+      sudo make install
+      cd /opt/render/project/src
       
-      # تهيئة Conda
-      conda init bash
-      source ~/.bashrc
+      # تثبيت numpy أولاً
+      pip install numpy==1.26.2
       
-      # إنشاء بيئة Conda جديدة
-      conda create -n myenv python=3.11 -y
-      conda activate myenv
+      # تثبيت TA-Lib من الحزمة المجمعة مسبقاً
+      pip install --no-cache-dir TA-Lib==0.4.28
       
-      # تثبيت TA-Lib من قناة conda-forge
-      conda install -c conda-forge ta-lib -y
-      
-      # تثبيت باقي المتطلبات باستخدام pip
+      # تثبيت باقي المتطلبات
       pip install -r requirements.txt
       
-      # التحقق من التثبيت
-      python -c "import talib; print('TA-Lib installed successfully')"
+      # التأكد من تثبيت TA-Lib
+      python -c "import talib; print('TA-Lib version:', talib.__version__)"
       
-    startCommand: |
-      export PATH="$HOME/miniconda/bin:$PATH"
-      source ~/.bashrc
-      conda activate myenv
-      gunicorn "main:app.server" --timeout 180
+    startCommand: gunicorn "main:app.server" --timeout 180
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
+      - key: LD_LIBRARY_PATH
+        value: /usr/lib
       - key: PYTHONPATH
         value: /opt/render/project/src
