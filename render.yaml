@@ -4,26 +4,35 @@ services:
     env: python
     buildCommand: |
       # تثبيت المتطلبات الأساسية
-      apt-get update
-      apt-get install -y wget build-essential
-
-      # تحميل وتثبيت TA-Lib
+      sudo apt-get update
+      sudo apt-get install -y build-essential wget
+      
+      # تنزيل وتثبيت TA-Lib
+      cd /tmp
       wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz
-      tar -xvf ta-lib-0.4.0-src.tar.gz
+      tar -xzf ta-lib-0.4.0-src.tar.gz
       cd ta-lib/
-      ./configure --prefix=/usr
+      ./configure
       make
-      make install
+      sudo make install
       cd ..
       rm -rf ta-lib-0.4.0-src.tar.gz ta-lib/
       
+      # تحديث متغيرات البيئة
+      export TA_LIBRARY_PATH=/usr/local/lib
+      export TA_INCLUDE_PATH=/usr/local/include
+      
       # تثبيت متطلبات Python
-      pip install numpy
-      pip install TA-Lib
+      pip install --no-cache-dir numpy
+      pip install --no-cache-dir TA-Lib
       pip install -r requirements.txt
     startCommand: gunicorn main:server
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
       - key: LD_LIBRARY_PATH
-        value: /usr/lib
+        value: /usr/local/lib
+      - key: TA_LIBRARY_PATH
+        value: /usr/local/lib
+      - key: TA_INCLUDE_PATH
+        value: /usr/local/include
