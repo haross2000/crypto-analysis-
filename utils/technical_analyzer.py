@@ -5,8 +5,7 @@ import pandas as pd
 import numpy as np
 import logging
 from typing import Dict, Any
-import TA-Lib  # إضافة استيراد talib
-
+import talib  # إضافة استيراد talib
 class TechnicalAnalyzer:
     """
     محلل المؤشرات الفنية
