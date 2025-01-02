@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 import logging
 from typing import Dict, Any
-import talib  # إضافة استيراد talib
+import TA-Lib  # إضافة استيراد talib
 
 class TechnicalAnalyzer:
     """
