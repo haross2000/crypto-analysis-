@@ -1,30 +1,13 @@
 services:
   - type: web
     name: crypto-analysis
-    env: python
-    buildCommand: |
-      # تثبيت Miniconda
-      wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-      bash miniconda.sh -b -p $HOME/miniconda
-      export PATH="$HOME/miniconda/bin:$PATH"
-      
-      # تهيئة conda وإضافة القنوات
-      conda init bash
-      source ~/.bashrc
-      conda config --add channels conda-forge
-      
-      # إنشاء وتفعيل بيئة conda
-      conda create -n myenv python=3.11 -y
-      conda activate myenv
-      
-      # تثبيت TA-Lib وباقي المتطلبات
-      conda install -c conda-forge ta-lib -y
-      pip install -r requirements.txt
-    startCommand: |
-      source $HOME/miniconda/bin/activate myenv
-      gunicorn main:server
+    env: docker
+    region: frankfurt
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.0
-      - key: CONDA_HOME
-        value: $HOME/miniconda
+      - key: PYTHONPATH
+        value: /app
+      - key: LD_LIBRARY_PATH
+        value: /usr/lib
