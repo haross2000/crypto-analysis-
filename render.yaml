@@ -7,34 +7,51 @@ services:
     buildCommand: |
       # تثبيت المكتبات الأساسية
       apt-get update
-      apt-get install -y python3-dev build-essential wget curl
+      apt-get install -y python3-dev build-essential wget git
 
-      # تثبيت TA-Lib من مستودع Ubuntu
-      curl -L https://ubuntu.pkgs.org/20.04/ubuntu-universe-amd64/ta-lib_0.4.0-3_amd64.deb.html -o ta-lib.deb
-      dpkg -i ta-lib.deb || true
-      apt-get -f install -y
+      # تحميل TA-Lib المجمع مسبقاً من GitHub
+      git clone https://github.com/TA-Lib/ta-lib.git
+      cd ta-lib/
+      ./configure --prefix=/usr
+      make
+      make install
+      cd ..
+      rm -rf ta-lib
       
       # تثبيت numpy أولاً
       pip install numpy==1.26.2
       
       # تثبيت TA-Lib Python
-      pip install TA-Lib==0.4.28
+      export TA_LIBRARY_PATH=/usr/lib
+      export TA_INCLUDE_PATH=/usr/include
+      pip install --no-binary :all: TA-Lib==0.4.28
       
       # تثبيت باقي المتطلبات
       pip install -r requirements.txt
       
-      # عرض المكتبات المثبتة للتأكد
-      pip list | grep -i ta-lib
+      # التحقق من التثبيت
+      python -c "import talib; print('TA-Lib installed successfully')"
       
       # عرض محتويات المجلد
       echo "=== محتويات المجلد ==="
       ls -la
+      
+      # عرض المكتبات المثبتة
+      echo "=== المكتبات المثبتة ==="
+      pip list
     startCommand: |
       cd /opt/render/project/src
+      export TA_LIBRARY_PATH=/usr/lib
+      export TA_INCLUDE_PATH=/usr/include
+      export LD_LIBRARY_PATH=/usr/lib
       gunicorn "main:app.server" --timeout 180 --workers 1 --log-level debug
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
+      - key: TA_LIBRARY_PATH
+        value: /usr/lib
+      - key: TA_INCLUDE_PATH
+        value: /usr/include
       - key: LD_LIBRARY_PATH
         value: /usr/lib
       - key: PYTHONPATH
