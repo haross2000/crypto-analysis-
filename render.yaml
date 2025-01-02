@@ -9,28 +9,17 @@ services:
       apt-get update
       apt-get install -y python3-dev build-essential wget
 
-      # تثبيت numpy أولاً
-      pip install numpy==1.26.2
+      # تحميل وتثبيت TA-Lib المجمع مسبقاً
+      wget https://files.pythonhosted.org/packages/e3/13/88f50646c3e3eff2e6fb7c0a55c3bf44e5f37eff34e1e9b29d8a62c6e6a0/TA_Lib-0.4.28-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+      pip install TA_Lib-0.4.28-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
 
-      # تحميل وتثبيت TA-Lib
-      wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz
-      tar -xzf ta-lib-0.4.0-src.tar.gz
-      cd ta-lib/
-      ./configure --prefix=/usr
-      make
-      make install
-      cd ..
-      rm -rf ta-lib ta-lib-0.4.0-src.tar.gz
-
-      # تثبيت TA-Lib Python بشكل منفصل
-      export TA_LIBRARY_PATH=/usr/lib
-      export TA_INCLUDE_PATH=/usr/include
-      pip install --no-cache-dir ta-lib==0.4.28
-      
       # تثبيت باقي المتطلبات
       pip install -r requirements.txt
       
-      # عرض محتويات المجلد للتأكد
+      # عرض المكتبات المثبتة للتأكد
+      pip list | grep -i ta-lib
+      
+      # عرض محتويات المجلد
       echo "=== محتويات المجلد ==="
       ls -la
     startCommand: |
@@ -39,11 +28,5 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
-      - key: TA_LIBRARY_PATH
-        value: /usr/lib
-      - key: TA_INCLUDE_PATH
-        value: /usr/include
-      - key: LD_LIBRARY_PATH
-        value: /usr/lib
       - key: PYTHONPATH
         value: /opt/render/project/src
