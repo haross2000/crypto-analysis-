@@ -2,29 +2,48 @@ services:
   - type: web
     name: crypto-analysis
     env: python
+    region: frankfurt
+    plan: free
     buildCommand: |
-      # تثبيت Miniconda
-      wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-      bash miniconda.sh -b -p $HOME/miniconda
-      export PATH="$HOME/miniconda/bin:$PATH"
+      # تثبيت المكتبات الأساسية
+      apt-get update
+      apt-get install -y python3-dev build-essential wget
+
+      # تثبيت numpy أولاً
+      pip install numpy==1.26.2
+
+      # تحميل وتثبيت TA-Lib
+      wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz
+      tar -xzf ta-lib-0.4.0-src.tar.gz
+      cd ta-lib/
+      ./configure --prefix=/usr
+      make
+      make install
+      cd ..
+      rm -rf ta-lib ta-lib-0.4.0-src.tar.gz
+
+      # تثبيت TA-Lib Python بشكل منفصل
+      export TA_LIBRARY_PATH=/usr/lib
+      export TA_INCLUDE_PATH=/usr/include
+      pip install --no-cache-dir ta-lib==0.4.28
       
-      # تهيئة conda وإضافة القنوات
-      conda init bash
-      source ~/.bashrc
-      conda config --add channels conda-forge
-      
-      # إنشاء وتفعيل بيئة conda
-      conda create -n myenv python=3.11 -y
-      conda activate myenv
-      
-      # تثبيت TA-Lib وباقي المتطلبات
-      conda install -c conda-forge ta-lib -y
+      # تثبيت باقي المتطلبات
       pip install -r requirements.txt
+      
+      # عرض محتويات المجلد للتأكد
+      echo "=== محتويات المجلد ==="
+      ls -la
     startCommand: |
-      source $HOME/miniconda/bin/activate myenv
-      gunicorn main:server
+      cd /opt/render/project/src
+      gunicorn "main:app.server" --timeout 180 --workers 1 --log-level debug
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
-      - key: CONDA_HOME
-        value: $HOME/miniconda
+      - key: TA_LIBRARY_PATH
+        value: /usr/lib
+      - key: TA_INCLUDE_PATH
+        value: /usr/include
+      - key: LD_LIBRARY_PATH
+        value: /usr/lib
+      - key: PYTHONPATH
+        value: /opt/render/project/src
