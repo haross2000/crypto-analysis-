@@ -5,11 +5,24 @@ services:
     buildCommand: |
       # تثبيت المتطلبات الأساسية
       sudo apt-get update
-      sudo apt-get install -y python3-dev
+      sudo apt-get install -y build-essential wget pkg-config
       
-      # تحميل وتثبيت الحزمة المجمعة مسبقاً لـ TA-Lib
-      wget https://files.pythonhosted.org/packages/0b/db/c85e12c91fc0f6c3e0e8f7572f089d5c6d5d93fbd6c4e22a4c6f65f69e20/TA_Lib-0.4.24-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
-      pip install TA_Lib-0.4.24-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+      # تنزيل وتثبيت TA-Lib
+      wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz
+      tar -xvzf ta-lib-0.4.0-src.tar.gz
+      cd ta-lib/
+      ./configure --prefix=/usr
+      make
+      sudo make install
+      cd ..
+      rm -rf ta-lib-0.4.0-src.tar.gz ta-lib/
+      
+      # تثبيت متطلبات Python
+      python -m pip install --upgrade pip
+      pip install wheel setuptools numpy
+      
+      # تثبيت TA-Lib من مصدر بديل
+      pip install --index-url https://pypi.anaconda.org/ranaroussi/simple ta-lib
       
       # تثبيت باقي المتطلبات
       pip install -r requirements.txt
@@ -17,3 +30,5 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
+      - key: LD_LIBRARY_PATH
+        value: /usr/lib
