@@ -1,0 +1,11 @@
+*.pyc
+__pycache__/
+.env
+.DS_Store
+venv/
+venv311/
+venv39/
+*.keras
+*.h5
+*.csv
+*.png
