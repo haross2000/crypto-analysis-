@@ -1,0 +1,7 @@
+build:
+  packages:
+    - ta-lib
+  python:
+    - requirements.txt
+run:
+  web: gunicorn main:server

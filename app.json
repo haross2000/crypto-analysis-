@@ -1,0 +1,20 @@
+{
+  "name": "Crypto Analysis",
+  "description": "تطبيق تحليل العملات الرقمية",
+  "repository": "https://github.com/haross2000/crypto-analysis-",
+  "keywords": ["python", "crypto", "analysis"],
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    },
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-apt"
+    }
+  ],
+  "env": {
+    "PYTHON_VERSION": {
+      "description": "Python version to use",
+      "value": "3.11.0"
+    }
+  }
+}
